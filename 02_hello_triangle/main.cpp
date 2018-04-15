@@ -37,11 +37,9 @@ int main() {
 	GLfloat vertices[] = { 0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 
 							0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 
 							-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, };
+							0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,};
 	
-	GLint indice[] = { 0, 1, 2 };
+	GLint indice[] = { 0, 1, 2, 2, 1, 3 };
 
 	GLuint points_vbo;
 	glGenBuffers( 1, &points_vbo );
@@ -137,8 +135,11 @@ int main() {
 		glUseProgram( shader_programme );
 		glBindVertexArray( vao );
 		// draw points 0-3 from the currently bound VAO with current in-use shader
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawArrays(GL_TRIANGLES, 3, 5);
+		//glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices));
+
+		//usando ebo!!
+		glDrawElements(GL_TRIANGLES, sizeof(indice), GL_UNSIGNED_INT, indice);
+
 		// update other events like input handling
 		glfwPollEvents();
 		if ( GLFW_PRESS == glfwGetKey( g_window, GLFW_KEY_ESCAPE ) ) {
