@@ -14,6 +14,16 @@ Based on OpenGL 4 Example Code.
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <glm/vec3.hpp> // glm::vec3
+#include <glm/vec4.hpp> // glm::vec4
+#include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+
 #define GL_LOG_FILE "gl.log"
 
 // keep track of window size for things like the viewport and the mouse cursor
@@ -39,7 +49,12 @@ int main() {
 							-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 							0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,};
 	
-	GLint indice[] = { 0, 1, 2, 2, 1, 3 };
+	GLint indice[] = { 0, 1, 2, 2, 1, 3};
+
+	glm::mat4 trans;
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+	trans = glm::scale(trans, glm::vec3(1.5, 1.5, 1.5));
+	trans = glm::translate(trans, glm::vec3(0.25f, 0.25f, 0.0f));
 
 	GLuint points_vbo;
 	glGenBuffers( 1, &points_vbo );
@@ -133,6 +148,9 @@ int main() {
 		glViewport( 0, 0, g_gl_width, g_gl_height );
 
 		glUseProgram( shader_programme );
+
+		unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 		glBindVertexArray( vao );
 		// draw points 0-3 from the currently bound VAO with current in-use shader
 		//glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices));
