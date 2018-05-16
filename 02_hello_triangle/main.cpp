@@ -40,19 +40,36 @@ int main() {
 	glEnable(GL_DEPTH_TEST); // enable depth-testing
 	glDepthFunc(GL_LESS);		 // depth-testing interprets a smaller value as "closer"
 
-								 /* OTHER STUFF GOES HERE NEXT */
-								 //GLfloat points[] = { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
-								 //GLfloat colours[] = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+	//criando vertices e cores numa só estrutura (x, y, z, r, g, b)
+	//GLfloat vertices[] = { 0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+	//	0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+	//	-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+	//	0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, };
 
-								 //criando vertices e cores numa só estrutura (x, y, z, r, g, b)
-	GLfloat vertices[] = { 0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, };
+	GLfloat vertices[] = {
+		0.0f, 0.5f, 0.0f, 
+					1.0f, 0.0f, 0.0f,
+		0.5f, 0.0f, 0.0f, 
+					0.0f, 1.0f, 0.0f,
+		-0.5f, 0.0f, 0.0f, 
+					0.0f, 0.0f, 1.0f,
+		0.0f, -0.5f, 0.0f, 
+					1.0f, 0.0f, 0.0f,
+		0.0f, 0.5f, -0.5f,
+					1.0f, 0.0f, 0.0f,
+		0.5f, 0.0f, -0.5f,
+					0.0f, 1.0f, 0.0f,
+		-0.5f, 0.0f, -0.5f,
+					0.0f, 0.0f, 1.0f,
+		0.0f, -0.5f, -0.5f,
+					1.0f, 0.0f, 0.0f
+	};
 
 	//0 é o primeiro vértice (topo do triangulo) e 3 é o ponto adicional para fazer um triangulo invertido
 	//ordem para renderização, sempre em sentido horário.
-	GLint indice[] = { 0, 1, 2, 2, 1, 3 };
+	GLint indice[] = { 0, 1, 2, 2, 1, 3, 
+						6, 5, 4, 7, 5, 6,
+						};
 
 	//criando variável trans com rotação, escala e translação.
 	glm::mat4 trans;
@@ -158,6 +175,27 @@ int main() {
 		//aplicando as transformações.
 		unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		projection = glm::perspective(glm::radians(45.0f), (float)g_gl_width / (float)g_gl_height, 0.1f, 100.0f);
+		// retrieve the matrix uniform locations
+		unsigned int modelLoc = glGetUniformLocation(shader_programme, "model");
+		unsigned int viewLoc = glGetUniformLocation(shader_programme, "view");
+		// pass them to the shaders (3 different ways)
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		// camera/view transformation
+		float radius = 10.0f;
+		float camX = sin(glfwGetTime()) * radius;
+		float camZ = cos(glfwGetTime()) * radius;
+		view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader_programme, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shader_programme, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(vao);
 		// draw points 0-3 from the currently bound VAO with current in-use shader
