@@ -31,6 +31,45 @@ int g_gl_width = 640;
 int g_gl_height = 480;
 GLFWwindow *g_window = NULL;
 
+float camX = 2.0f;
+float camY = 2.0f;
+float camZ = 2.0f;
+
+float speed = 0.001;
+
+void keysPress()
+{
+	if (GLFW_PRESS == glfwGetKey(g_window, GLFW_KEY_ESCAPE))
+	{
+		glfwSetWindowShouldClose(g_window, 1);
+	}
+
+	if (glfwGetKey(g_window, GLFW_KEY_W) == GLFW_PRESS) 
+	{
+		camZ += speed;
+	}
+	if (glfwGetKey(g_window, GLFW_KEY_S) == GLFW_PRESS) 
+	{
+		camZ -= speed;
+	}
+	if (glfwGetKey(g_window, GLFW_KEY_A) == GLFW_PRESS) 
+	{
+		camX -= speed;
+	}
+	if (glfwGetKey(g_window, GLFW_KEY_D) == GLFW_PRESS) 
+	{
+		camX += speed;
+	}
+	if (glfwGetKey(g_window, GLFW_KEY_UP) == GLFW_PRESS) 
+	{
+		camY += speed;
+	}
+	if (glfwGetKey(g_window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		camY -= speed;
+	}
+}
+
 int main() {
 	restart_gl_log();
 	// all the start-up code for GLFW and GLEW is called here
@@ -50,32 +89,36 @@ int main() {
 		0.0f, 0.5f, 0.0f, 
 					1.0f, 0.0f, 0.0f,
 		0.5f, 0.0f, 0.0f, 
-					0.0f, 1.0f, 0.0f,
+					1.0f, 0.0f, 0.0f,
 		-0.5f, 0.0f, 0.0f, 
-					0.0f, 0.0f, 1.0f,
+					1.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 
 					1.0f, 0.0f, 0.0f,
-		0.0f, 0.5f, -0.5f,
-					1.0f, 0.0f, 0.0f,
-		0.5f, 0.0f, -0.5f,
-					0.0f, 1.0f, 0.0f,
-		-0.5f, 0.0f, -0.5f,
+		0.0f, 0.5f, -0.65f,
 					0.0f, 0.0f, 1.0f,
-		0.0f, -0.5f, -0.5f,
-					1.0f, 0.0f, 0.0f
+		0.5f, 0.0f, -0.65f,
+					0.0f, 0.0f, 1.0f,
+		-0.5f, 0.0f, -0.65f,
+					0.0f, 0.0f, 1.0f,
+		0.0f, -0.5f, -0.65f,
+					0.0f, 0.0f, 1.0f
 	};
 
 	//0 é o primeiro vértice (topo do triangulo) e 3 é o ponto adicional para fazer um triangulo invertido
 	//ordem para renderização, sempre em sentido horário.
 	GLint indice[] = { 0, 1, 2, 2, 1, 3, 
-						6, 5, 4, 7, 5, 6,
+						4, 6, 5, 5, 6, 7,
+						0, 4, 1, 1, 4, 5,
+						3, 1, 7, 7, 1, 5,
+						2, 3, 6, 6, 3, 7,
+						6, 0, 2, 6, 4, 0
 						};
 
 	//criando variável trans com rotação, escala e translação.
-	glm::mat4 trans;
-	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-	trans = glm::translate(trans, glm::vec3(0.3f, -0.3f, 0.0f));
+	//glm::mat4 trans;
+	//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+	//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+	//trans = glm::translate(trans, glm::vec3(0.3f, -0.3f, 0.0f));
 
 	//apenas um vbo
 	GLuint points_vbo;
@@ -174,12 +217,12 @@ int main() {
 
 		//aplicando as transformações.
 		unsigned int transformLoc = glGetUniformLocation(shader_programme, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		glm::mat4 model;
 		glm::mat4 view;
 		glm::mat4 projection;
-		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 		projection = glm::perspective(glm::radians(45.0f), (float)g_gl_width / (float)g_gl_height, 0.1f, 100.0f);
 		// retrieve the matrix uniform locations
@@ -189,10 +232,10 @@ int main() {
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		// camera/view transformation
-		float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
-		view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//float radius = 10.0f;
+		//float camX = sin(glfwGetTime()) * radius;
+		//float camZ = cos(glfwGetTime()) * radius;
+		view = glm::lookAt(glm::vec3(camX, camY, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader_programme, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shader_programme, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -206,9 +249,7 @@ int main() {
 
 		// update other events like input handling
 		glfwPollEvents();
-		if (GLFW_PRESS == glfwGetKey(g_window, GLFW_KEY_ESCAPE)) {
-			glfwSetWindowShouldClose(g_window, 1);
-		}
+		keysPress();
 		// put the stuff we've been drawing onto the display
 		glfwSwapBuffers(g_window);
 	}
